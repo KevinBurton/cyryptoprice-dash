@@ -2,6 +2,7 @@
 <link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="bower_components/paper-spinner/paper-spinner-lite.html">
 <script src="bower_components/chart.js/dist/Chart.js"></script>
+<script src="bower_components/moment/min/moment.min.js"></script>
 <dom-module id="cryptoprice-dash">
     <template>
         <h2>Hello World!!</h2>
@@ -87,10 +88,16 @@
                 var label = [];
                 var price = [];
                 data.response.data.prices.forEach(function(element) {
-                    label.push(element.time);
+                    label.push(this._computeDateTime(element.time));
                     price.push(element.price);
-                });
+                }, this);
                 this._generateLineChart(label, price, code);
+            }
+            _computeDateTime(dateString) {
+                if(dateString) {
+                    return moment(dateString, "YYYY-MM-DDThh:mm:aaZ").format('M/DD/YYY h:mm a');
+                }
+                return dateString;
             }
             _generateLineChart(label, price, graphName) {
                 if(this.myLineChart !== undefined) myLineChart.destroy();
@@ -99,15 +106,14 @@
                 var myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: label,
+                        labels: label.reverse(),
                         datasets: [
                             {
                                 label: graphName,
-                                data: [12, 19, 3, 5, 2, 3],
                                 backgroundColor: 'rgba(111, 124, 186, 0.1)',
                                 borderColor: 'rgba(111, 124, 186, 1)',
                                 borderWidth: 2,
-                                data: price
+                                data: price.reverse()
                             }
                         ]
                     },
